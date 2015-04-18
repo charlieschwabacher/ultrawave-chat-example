@@ -1,0 +1,31 @@
+{
+  "name": "ultrawave-chat-example",
+  "version": "1.0.0",
+  "description": "ultrawave chat example",
+  "main": "index.js",
+  "scripts": {
+    "start": "node server.js",
+    "build": "browserify src/index.js -t [ babelify --stage 0 ] --outfile public/index.js",
+    "watch": "watch 'npm run-script build' ./src"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/charlieschwabacher/ultrawave-chat-example.git"
+  },
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/charlieschwabacher/ultrawave-chat-example/issues"
+  },
+  "homepage": "https://github.com/charlieschwabacher/ultrawave-chat-example",
+  "dependencies": {
+    "node-static": "^0.7.6",
+    "react": "^0.13.1",
+    "ultrawave": "0.0.5"
+  },
+  "devDependencies": {
+    "babelify": "^6.0.2",
+    "browserify": "^9.0.8",
+    "watch": "^0.16.0"
+  }
+}
