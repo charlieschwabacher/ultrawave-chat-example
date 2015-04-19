@@ -603,7 +603,9 @@ var isUnitlessNumber = {
   columnCount: true,
   flex: true,
   flexGrow: true,
+  flexPositive: true,
   flexShrink: true,
+  flexNegative: true,
   fontWeight: true,
   lineClamp: true,
   lineHeight: true,
@@ -616,7 +618,9 @@ var isUnitlessNumber = {
 
   // SVG-related properties
   fillOpacity: true,
-  strokeOpacity: true
+  strokeDashoffset: true,
+  strokeOpacity: true,
+  strokeWidth: true
 };
 
 /**
@@ -3703,6 +3707,7 @@ var HTMLDOMPropertyConfig = {
     headers: null,
     height: MUST_USE_ATTRIBUTE,
     hidden: MUST_USE_ATTRIBUTE | HAS_BOOLEAN_VALUE,
+    high: null,
     href: null,
     hrefLang: null,
     htmlFor: null,
@@ -3713,6 +3718,7 @@ var HTMLDOMPropertyConfig = {
     lang: null,
     list: MUST_USE_ATTRIBUTE,
     loop: MUST_USE_PROPERTY | HAS_BOOLEAN_VALUE,
+    low: null,
     manifest: MUST_USE_ATTRIBUTE,
     marginHeight: null,
     marginWidth: null,
@@ -3727,6 +3733,7 @@ var HTMLDOMPropertyConfig = {
     name: null,
     noValidate: HAS_BOOLEAN_VALUE,
     open: HAS_BOOLEAN_VALUE,
+    optimum: null,
     pattern: null,
     placeholder: null,
     poster: null,
@@ -3740,6 +3747,7 @@ var HTMLDOMPropertyConfig = {
     rowSpan: null,
     sandbox: null,
     scope: null,
+    scoped: HAS_BOOLEAN_VALUE,
     scrolling: null,
     seamless: MUST_USE_ATTRIBUTE | HAS_BOOLEAN_VALUE,
     selected: MUST_USE_PROPERTY | HAS_BOOLEAN_VALUE,
@@ -3781,7 +3789,9 @@ var HTMLDOMPropertyConfig = {
     itemID: MUST_USE_ATTRIBUTE,
     itemRef: MUST_USE_ATTRIBUTE,
     // property is supported for OpenGraph in meta tags.
-    property: null
+    property: null,
+    // IE-only attribute that controls focus behavior
+    unselectable: MUST_USE_ATTRIBUTE
   },
   DOMAttributeNames: {
     acceptCharset: 'accept-charset',
@@ -4391,7 +4401,7 @@ if ("production" !== process.env.NODE_ENV) {
   }
 }
 
-React.version = '0.13.1';
+React.version = '0.13.2';
 
 module.exports = React;
 
@@ -6429,6 +6439,14 @@ var ReactCompositeComponentMixin = {
         this.getName() || 'a component'
       ) : null);
       ("production" !== process.env.NODE_ENV ? warning(
+        !inst.getDefaultProps ||
+        inst.getDefaultProps.isReactClassApproved,
+        'getDefaultProps was defined on %s, a plain JavaScript class. ' +
+        'This is only supported for classes created using React.createClass. ' +
+        'Use a static property to define defaultProps instead.',
+        this.getName() || 'a component'
+      ) : null);
+      ("production" !== process.env.NODE_ENV ? warning(
         !inst.propTypes,
         'propTypes was defined as an instance property on %s. Use a static ' +
         'property to define propTypes instead.',
@@ -6997,7 +7015,7 @@ var ReactCompositeComponentMixin = {
         this._renderedComponent,
         thisID,
         transaction,
-        context
+        this._processChildContext(context)
       );
       this._replaceNodeWithMarkupByID(prevComponentID, nextMarkup);
     }
@@ -7871,6 +7889,8 @@ ReactDOMComponent.Mixin = {
       if (propKey === STYLE) {
         if (nextProp) {
           nextProp = this._previousStyleCopy = assign({}, nextProp);
+        } else {
+          this._previousStyleCopy = null;
         }
         if (lastProp) {
           // Unset styles on `lastProp` but not on `nextProp`.
@@ -10491,9 +10511,9 @@ function warnForPropsMutation(propName, element) {
 
   ("production" !== process.env.NODE_ENV ? warning(
     false,
-    'Don\'t set .props.%s of the React component%s. ' +
-    'Instead, specify the correct value when ' +
-    'initially creating the element.%s',
+    'Don\'t set .props.%s of the React component%s. Instead, specify the ' +
+    'correct value when initially creating the element or use ' +
+    'React.cloneElement to make a new element with updated props.%s',
     propName,
     elementInfo,
     ownerInfo
@@ -18434,6 +18454,7 @@ assign(
 function isInternalComponentType(type) {
   return (
     typeof type === 'function' &&
+    typeof type.prototype !== 'undefined' &&
     typeof type.prototype.mountComponent === 'function' &&
     typeof type.prototype.receiveComponent === 'function'
   );
@@ -19912,7 +19933,7 @@ var VectorClock = require('./vector_clock');
 
 var interval = 200;
 
-module.exports = (function () {
+var Ultrawave = (function () {
   function Ultrawave(url) {
     var _this = this;
 
@@ -20162,30 +20183,16 @@ module.exports = (function () {
       return handle;
     }
   }, {
-    key: 'create',
-    value: function create(group, initialData, cb) {
-      var _this4 = this;
-
-      return new Promise(function (resolve, reject) {
-        _this4.peerGroup.ready.then(function (id) {
-          _this4.peerGroup.create(group).then(function () {
-            _this4.clocks.set(group, new VectorClock({ id: id }));
-            resolve(_this4._startCursor(group, initialData, cb));
-          })['catch'](reject);
-        });
-      });
-    }
-  }, {
     key: 'join',
     value: function join(group, cb) {
-      var _this5 = this;
+      var _this4 = this;
 
       var events = this.peerGroup.events;
 
       return new Promise(function (resolve, reject) {
-        _this5.peerGroup.ready.then(function (id) {
-          _this5.peerGroup.join(group).then(function () {
-            _this5.clocks.set(group, new VectorClock({ id: id }));
+        _this4.peerGroup.ready.then(function (id) {
+          _this4.peerGroup.join(group).then(function () {
+            _this4.clocks.set(group, new VectorClock({ id: id }));
 
             // request the current document state from the first peer we form a
             // connection to, then send 'request changes' to each new peer
@@ -20208,7 +20215,7 @@ module.exports = (function () {
             })(function () {
               if (docRequestCandidates.length > 0) {
                 var _peer3 = docRequestCandidates.shift();
-                _this5.peerGroup.sendTo(group, _peer3, 'request document');
+                _this4.peerGroup.sendTo(group, _peer3, 'request document');
               }
 
               docRequestTimeout = setTimeout(requestDocumentRetry, interval);
@@ -20231,7 +20238,7 @@ module.exports = (function () {
 
                 // request the document immediately from the first peer
 
-                _this5.peerGroup.sendTo(group, id, 'request document');
+                _this4.peerGroup.sendTo(group, id, 'request document');
                 docRequestTimeout = setTimeout(requestDocumentRetry, interval);
               } else if (documentClock == null) {
 
@@ -20244,11 +20251,11 @@ module.exports = (function () {
                 // once the document has been recevied, request changes from
                 // peers as we connect to them
 
-                _this5.peerGroup.send(group, id, 'request changes', documentClock);
+                _this4.peerGroup.send(group, id, 'request changes', documentClock);
                 changeRequestCandidates['delete'](id);
 
                 if (changeRequestCandidates.size === 0) {
-                  _this5.peerGroup.off(events.peer, onPeer);
+                  _this4.peerGroup.off(events.peer, onPeer);
                 }
               }
             });
@@ -20268,11 +20275,11 @@ module.exports = (function () {
               var data = _ref3.data;
 
               if (subjectGroup !== group) return;
-              _this5.peerGroup.off(events.document, onDocument);
+              _this4.peerGroup.off(events.document, onDocument);
               clearTimeout(docRequestTimeout);
 
               clock = new VectorClock(clock);
-              _this5._updateClock(group, clock);
+              _this4._updateClock(group, clock);
 
               // request changes from all group members
               changeRequestCandidates = new Set(clock.keys());
@@ -20282,11 +20289,11 @@ module.exports = (function () {
               var _iteratorError2 = undefined;
 
               try {
-                for (var _iterator2 = _this5.peerGroup.peers(group)[Symbol.iterator](), _step2; !(_iteratorNormalCompletion2 = (_step2 = _iterator2.next()).done); _iteratorNormalCompletion2 = true) {
+                for (var _iterator2 = _this4.peerGroup.peers(group)[Symbol.iterator](), _step2; !(_iteratorNormalCompletion2 = (_step2 = _iterator2.next()).done); _iteratorNormalCompletion2 = true) {
                   var _peer4 = _step2.value;
 
                   if (changeRequestCandidates['delete'](_peer4)) {
-                    _this5.peerGroup.send(group, 'request changes', clock);
+                    _this4.peerGroup.send(group, 'request changes', clock);
                   }
                 }
               } catch (err) {
@@ -20304,12 +20311,50 @@ module.exports = (function () {
                 }
               }
 
-              resolve(_this5._startCursor(group, data, cb));
+              resolve(_this4._startCursor(group, data, cb));
             });
 
-            _this5.peerGroup.on(events.peer, onPeer);
-            _this5.peerGroup.on('document', onDocument);
+            _this4.peerGroup.on(events.peer, onPeer);
+            _this4.peerGroup.on('document', onDocument);
           })['catch'](reject);
+        });
+      });
+    }
+  }, {
+    key: 'create',
+    value: function create(group, initialData, cb) {
+      var _this5 = this;
+
+      return new Promise(function (resolve, reject) {
+        _this5.peerGroup.ready.then(function (id) {
+          _this5.peerGroup.create(group).then(function () {
+            _this5.clocks.set(group, new VectorClock({ id: id }));
+            resolve(_this5._startCursor(group, initialData, cb));
+          })['catch'](reject);
+        });
+      });
+    }
+  }, {
+    key: 'joinOrCreate',
+    value: function joinOrCreate(group, initialData, cb) {
+      var _this6 = this;
+
+      return new Promise(function (resolve, reject) {
+        var tries = 10;
+        var attempt = function attempt(cb) {
+          return function () {
+            (tries -= 1 > 0) ? cb() : reject();
+          };
+        };
+
+        _this6.peerGroup.ready.then(function (id) {
+          var create = attempt(function () {
+            return _this6.create(group, initialData, cb).then(resolve)['catch'](join);
+          });
+          var join = attempt(function () {
+            return _this6.join(group, cb).then(resolve)['catch'](create);
+          });
+          join();
         });
       });
     }
@@ -20359,7 +20404,9 @@ module.exports = (function () {
 
 // export cursor superclass for type checking
 
-module.exports.Cursor = Subtree.Cursor;
+Ultrawave.Cursor = Subtree.Cursor;
+
+module.exports = Ultrawave;
 },{"./data_structures/map_array":157,"./data_structures/map_map_map":158,"./data_structures/map_map_set":159,"./vector_clock":161,"peergroup":166,"subtree":170}],161:[function(require,module,exports){
 'use strict';
 
@@ -20885,8 +20932,8 @@ var PeerGroup = (function () {
       var connection = _this.connections.get(group, from);
 
       if (connection != null) {
-        var _candidate = new RTCIceCandidate(_candidate);
-        connection.addIceCandidate(_candidate);
+        var rtcCandidate = new RTCIceCandidate(candidate);
+        connection.addIceCandidate(rtcCandidate);
       }
     });
   }
@@ -21285,13 +21332,13 @@ module.exports = (function () {
     _classCallCheck(this, CursorCache);
 
     this.data = data;
-    this.root = new Map();
+    this.root = Array.isArray(data()) ? [] : new Map();
   }
 
   _createClass(CursorCache, [{
     key: 'reset',
     value: function reset() {
-      this.root = new Map();
+      this.root = Array.isArray(this.data()) ? [] : new Map();
     }
   }, {
     key: 'get',
@@ -21444,7 +21491,7 @@ module.exports = (function () {
 
 module.exports = function deepFreeze(object) {
 
-  if (!object instanceof Object) {
+  if (!(object instanceof Object)) {
     return object;
   }for (var key in object) {
     if (!object.hasOwnProperty(key)) continue;
@@ -21644,14 +21691,21 @@ module.exports = {
 
       cache.spliceArray(fullPath, start, deleteCount, elements.length);
 
-      return modifyAt(fullPath, function (target, key) {
-        var arr = target[key];
-        if (!Array.isArray(arr)) throw new Error('can\'t splice a non array');
-        var updated = arr.slice(0);
+      if (fullPath.length > 0) {
+        return modifyAt(fullPath, function (target, key) {
+          var arr = target[key];
+          if (!Array.isArray(arr)) throw new Error('can\'t splice a non array');
+          var updated = arr.slice(0);
+          var result = updated.splice.apply(updated, [start, deleteCount].concat(elements));
+          target[key] = deepFreeze(updated);
+          return result;
+        });
+      } else {
+        var updated = data.slice(0);
         var result = updated.splice.apply(updated, [start, deleteCount].concat(elements));
-        target[key] = deepFreeze(updated);
+        update(deepFreeze(updated));
         return result;
-      });
+      }
     };
 
     // we create a local cursor class w/ access to mutable reference to data
@@ -21802,27 +21856,46 @@ module.exports = {
       }, {
         key: 'push',
         value: function push(path, value) {
-          return this.splice(path, Infinity, 0, value);
+          if (arguments.length === 1) {
+            value = path;
+            path = [];
+          }
+
+          return this.splice(path, Number.MAX_SAFE_INTEGER, 0, value);
         }
       }, {
         key: 'pop',
-        value: function pop(path) {
+        value: function pop() {
+          var path = arguments[0] === undefined ? [] : arguments[0];
+
           return this.splice(path, -1, 1)[0];
         }
       }, {
         key: 'unshift',
         value: function unshift(path, value) {
+          if (arguments.length === 1) {
+            value = path;
+            path = [];
+          }
+
           return this.splice(path, 0, 0, value);
         }
       }, {
         key: 'shift',
-        value: function shift(path) {
+        value: function shift() {
+          var path = arguments[0] === undefined ? [] : arguments[0];
+
           return this.splice(path, 0, 1)[0];
         }
       }, {
         key: 'bind',
         value: function bind(path, pre) {
           var _this = this;
+
+          if (arguments.length === 1) {
+            path = [];
+            pre = path;
+          }
 
           return function (v) {
             _this.set(path, pre ? pre(v) : v);
@@ -21912,18 +21985,10 @@ var _classCallCheck = function (instance, Constructor) { if (!(instance instance
 
 var _createClass = (function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ('value' in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; })();
 
-var _get = function get(object, property, receiver) { var desc = Object.getOwnPropertyDescriptor(object, property); if (desc === undefined) { var parent = Object.getPrototypeOf(object); if (parent === null) { return undefined; } else { return get(parent, property, receiver); } } else if ('value' in desc) { return desc.value; } else { var getter = desc.get; if (getter === undefined) { return undefined; } return getter.call(receiver); } };
-
 var _inherits = function (subClass, superClass) { if (typeof superClass !== 'function' && superClass !== null) { throw new TypeError('Super expression must either be null or a function, not ' + typeof superClass); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, enumerable: false, writable: true, configurable: true } }); if (superClass) subClass.__proto__ = superClass; };
 
-var React = require('react');
 var Ultrawave = require('ultrawave');
-
-var ultrawave = new Ultrawave('ws://localhost:8081');
-var initialData = {
-  topic: 'Welcome!',
-  messages: []
-};
+var React = require('react');
 
 var App = (function (_React$Component) {
   function App() {
@@ -21931,99 +21996,54 @@ var App = (function (_React$Component) {
 
     _classCallCheck(this, App);
 
-    _get(Object.getPrototypeOf(App.prototype), 'constructor', this).call(this);
-    this.propTypes = {
-      root: React.PropTypes.instanceOf(Ultrawave.Cursor).isRequired()
-    };
+    if (_React$Component != null) {
+      _React$Component.apply(this, arguments);
+    }
 
-    this.postMessage = function (e) {
+    this.onSubmit = function (e) {
       e.preventDefault();
-      var input = _this.refs.message.getDOMNode();
-      var message = input.value;
+      var input = _this.refs.input.getDOMNode();
+      _this.props.data.push(input.value);
       input.value = '';
-
-      if (message != null) {
-        _this.props.root.push('messages', {
-          author: _this.state.name,
-          text: message
-        });
-      }
     };
-
-    this.state = {
-      name: ''
-    };
-
-    console.log('created App');
   }
 
   _inherits(App, _React$Component);
 
   _createClass(App, [{
-    key: 'propTypes',
-    value: undefined,
-    enumerable: true
-  }, {
-    key: 'postMessage',
+    key: 'onSubmit',
     value: undefined,
     enumerable: true
   }, {
     key: 'render',
     value: function render() {
-      console.log('rendering');
-      console.log(this.props);
-      console.log(this.props.root.get());
-      var data = this.props.root.get();
-
       return React.createElement(
-        'div',
+        'main',
         null,
         React.createElement(
-          'h1',
-          { className: 'p2 m0 bg-teal white' },
+          'header',
+          null,
           'Ultrawave Chat'
         ),
         React.createElement(
-          'div',
-          { className: 'col col-3' },
-          'Topic: ',
-          data.topic
+          'ul',
+          null,
+          this.props.data.get().map(function (message, i) {
+            return React.createElement(
+              'li',
+              { key: i },
+              message
+            );
+          })
         ),
         React.createElement(
-          'div',
-          { className: 'col col-9' },
-          data.messages.map(function (message) {
-            return React.createElement(
-              'p',
-              null,
-              React.createElement(
-                'span',
-                { 'class': 'bold' },
-                message.author
-              ),
-              ':',
-              message.text
-            );
-          }),
+          'form',
+          { onSubmit: this.onSubmit },
+          React.createElement('input', { type: 'text', ref: 'input' }),
           React.createElement(
-            'form',
-            {
-              onSubmit: this.postMessage,
-              className: 'flex flex-row'
-            },
-            React.createElement('input', {
-              type: 'text',
-              className: 'field-light',
-              ref: 'message'
-            }),
-            React.createElement(
-              'button',
-              {
-                type: 'submit',
-                className: 'h3 button'
-              },
-              'Send'
-            )
+            'button',
+            { type: 'submit' },
+            'Send'
           )
         )
       );
@@ -22033,12 +22053,8 @@ var App = (function (_React$Component) {
   return App;
 })(React.Component);
 
-ultrawave.create('chat', initialData, function (root) {
-  React.render(React.createElement(App, { root: root }), document.body);
-}).then(function () {
-  console.log('then');
-})['catch'](function (e) {
-  console.log(e.stack);
+new Ultrawave('ws://localhost:8081').joinOrCreate('chat', [], function (data) {
+  React.render(React.createElement(App, { data: data }), document.body);
 });
 
 },{"react":156,"ultrawave":171}]},{},[172]);
