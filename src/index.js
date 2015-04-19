@@ -1,94 +1,30 @@
-const React = require('react')
 const Ultrawave = require('ultrawave')
-
-
-const ultrawave = new Ultrawave('ws://localhost:8081')
-const initialData = {
-  topic: 'Welcome!',
-  messages: []
-}
-
+const React = require('react')
 
 class App extends React.Component {
-
-  constructor() {
-    super()
-    this.state = {
-      name: ''
-    }
-
-    console.log('created App')
-  }
-
-  propTypes = {
-    root: React.PropTypes.instanceOf(Ultrawave.Cursor).isRequired()
-  }
-
-  postMessage = (e) => {
+  onSubmit = (e) => {
     e.preventDefault()
-    const input = this.refs.message.getDOMNode()
-    const message = input.value
+    const input = this.refs.input.getDOMNode()
+    this.props.data.push(input.value)
     input.value = ''
-
-    if (message != null) {
-      this.props.root.push('messages', {
-        author: this.state.name,
-        text: message
-      })
-    }
   }
 
   render() {
-    console.log('rendering')
-    console.log(this.props)
-    console.log(this.props.root.get())
-    const data = this.props.root.get()
-
-    return (
-      <div>
-        <h1 className='p2 m0 bg-teal white'>
-          Ultrawave Chat
-        </h1>
-        <div className='col col-3'>
-          Topic: {data.topic}
-        </div>
-        <div className='col col-9'>
-          {
-            data.messages.map((message) => {
-              return (
-                <p>
-                  <span class='bold'>{message.author}</span>:
-                  {message.text}
-                </p>
-              )
-            })
-          }
-          <form
-            onSubmit={this.postMessage}
-            className='flex flex-row'
-          >
-            <input
-              type='text'
-              className='field-light'
-              ref='message'
-            />
-            <button
-              type='submit'
-              className='h3 button'
-            >
-              Send
-            </button>
-          </form>
-        </div>
-      </div>
-    )
+    return <main>
+      <header>Ultrawave Chat</header>
+      <ul>
+        {this.props.data.get().map((message, i) =>
+          <li key={i}>{message}</li>
+        )}
+      </ul>
+      <form onSubmit={this.onSubmit}>
+        <input type='text' ref='input'/>
+        <button type='submit'>Send</button>
+      </form>
+    </main>
   }
-
 }
 
-ultrawave
-  .create('chat', initialData, (root) => {
-    React.render(<App root={root}/>, document.body)
-  })
-  .then(() => {console.log('then')})
-  .catch((e) => {console.log(e.stack)})
+(new Ultrawave('ws://localhost:8081')).joinOrCreate('chat', [], (data) => {
+  React.render(<App data={data}/>, document.body)
+})
