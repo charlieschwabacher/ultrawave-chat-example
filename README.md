@@ -1,8 +1,10 @@
 # ultrawave-chat-example
 
-This is a simple peer to peer chat app in 30 lines using [ultrawave](//github.com/charlieschwabcher/ultrawave)
+This is a simple peer to peer chat app using [ultrawave](//github.com/charlieschwabcher/ultrawave)
 and [react](//github.com/facebook/react).
 
-To run locally, run `npm install` and `npm start`
+Find the javascript code in [src/index.js](src/index.js)
 
-The source is es6 and css4 - to make edits, compile or watch w/ babel and cssnext by running `npm run build` or `npm run watch`.
+To run locally, run `npm install` and `npm start`, and then visit [localhost:8080](http://localhost:8080/)
+
+The source is written es6 and css4 - after making edits, compile w/ babel and cssnext by running `npm run build`.
