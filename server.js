@@ -1,4 +1,4 @@
-var UltrawaveServer = require('../ultrawave/server');
+var UltrawaveServer = require('ultrawave/server');
 var static = require('node-static');
 var http = require('http')
 
