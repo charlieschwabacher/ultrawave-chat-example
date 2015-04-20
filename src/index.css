@@ -1,0 +1,50 @@
+html, body {
+  height: 100%;
+  margin: 0;
+  overflow: hidden;
+  font-size: 18px;
+}
+
+* {
+  font-family: Avenir Next, Helvetica Neue, Helvetica, sans-serif;
+  font-size: 18px;
+  color: #212121;
+  border: 0;
+  outline: none;
+}
+
+main {
+  display: flex;
+  flex-flow: column nowrap;
+  height: 100%;
+}
+
+header {
+  flex: none;
+  padding: 10px 20px;
+  background: #79daff;
+}
+
+ul {
+  flex: auto;
+  padding: 10px;
+  overflow-y: auto;
+  background: #f4f4f4;
+  margin: 0;
+}
+
+form {
+  flex: none;
+  display: flex;
+}
+
+input {
+  flex: auto;
+  padding: 10px 20px;
+}
+
+button {
+  background: #79daff;
+  padding: 10px 40px;
+  cursor: pointer;
+}
