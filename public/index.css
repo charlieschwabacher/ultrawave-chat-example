@@ -8,6 +8,7 @@ html, body {
 * {
   font-family: Avenir Next, Helvetica Neue, Helvetica, sans-serif;
   font-size: 18px;
+  font-weight: 400;
   color: #212121;
   border: 0;
   outline: none;
@@ -38,10 +39,19 @@ ul {
   -webkit-flex: auto;
       -ms-flex: auto;
           flex: auto;
-  padding: 10px;
   overflow-y: auto;
   background: #f4f4f4;
   margin: 0;
+  padding: 10px 0;
+}
+
+li {
+  list-style-type: none;
+  padding: 5px 20px;
+}
+
+li.self {
+  font-weight: 600;
 }
 
 form {

@@ -21987,8 +21987,8 @@ var _createClass = (function () { function defineProperties(target, props) { for
 
 var _inherits = function (subClass, superClass) { if (typeof superClass !== 'function' && superClass !== null) { throw new TypeError('Super expression must either be null or a function, not ' + typeof superClass); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, enumerable: false, writable: true, configurable: true } }); if (superClass) subClass.__proto__ = superClass; };
 
-var Ultrawave = require('ultrawave');
-var React = require('react');
+window.Ultrawave = require('ultrawave');
+window.React = require('react');
 
 var App = (function (_React$Component) {
   function App() {
@@ -22003,8 +22003,11 @@ var App = (function (_React$Component) {
     this.onSubmit = function (e) {
       e.preventDefault();
       var input = _this.refs.input.getDOMNode();
-      _this.props.data.push(input.value);
+      var text = input.value;
       input.value = '';
+
+      // push the new message onto the array in ultrawave
+      _this.props.data.push({ sender: _this.props.id, text: text });
     };
   }
 
@@ -22017,6 +22020,16 @@ var App = (function (_React$Component) {
   }, {
     key: 'render',
     value: function render() {
+      var _this2 = this;
+
+      // get the array object out of our cursor
+      var messages = this.props.data.get();
+
+      // make sure messages stay scrolled to the bottom
+      setTimeout(function () {
+        _this2.refs.messages.getDOMNode().scrollTop = Infinity;
+      });
+
       return React.createElement(
         'main',
         null,
@@ -22027,12 +22040,14 @@ var App = (function (_React$Component) {
         ),
         React.createElement(
           'ul',
-          null,
-          this.props.data.get().map(function (message, i) {
+          { ref: 'messages' },
+          messages.map(function (_ref, i) {
+            var sender = _ref.sender;
+            var text = _ref.text;
             return React.createElement(
               'li',
-              { key: i },
-              message
+              { className: sender === _this2.props.id ? 'self' : '', key: i },
+              text
             );
           })
         ),
@@ -22053,8 +22068,15 @@ var App = (function (_React$Component) {
   return App;
 })(React.Component);
 
-new Ultrawave('ws://localhost:8081').joinOrCreate('chat', [], function (data) {
-  React.render(React.createElement(App, { data: data }), document.body);
+// connect to our peering server on port 8081
+
+var ultrawave = new Ultrawave('ws://' + location.hostname + ':8081');
+
+// create a group named "chat" w/ an empty array as initial data, and re-render
+// our react component when data changes
+
+ultrawave.joinOrCreate('chat', [], function (data) {
+  React.render(React.createElement(App, { data: data, id: ultrawave.id }), document.body);
 });
 
 },{"react":156,"ultrawave":171}]},{},[172]);
