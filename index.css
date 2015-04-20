@@ -1,0 +1,70 @@
+html, body {
+  height: 100%;
+  margin: 0;
+  overflow: hidden;
+  font-size: 18px;
+}
+
+* {
+  font-family: Avenir Next, Helvetica Neue, Helvetica, sans-serif;
+  font-size: 18px;
+  color: #212121;
+  border: 0;
+  outline: none;
+}
+
+main {
+  display: -webkit-box;
+  display: -webkit-flex;
+  display: -ms-flexbox;
+  display: flex;
+  -webkit-flex-flow: column nowrap;
+      -ms-flex-flow: column nowrap;
+          flex-flow: column nowrap;
+  height: 100%;
+}
+
+header {
+  -webkit-box-flex: 0;
+  -webkit-flex: none;
+      -ms-flex: none;
+          flex: none;
+  padding: 10px 20px;
+  background: #79daff;
+}
+
+ul {
+  -webkit-box-flex: 1;
+  -webkit-flex: auto;
+      -ms-flex: auto;
+          flex: auto;
+  padding: 10px;
+  overflow-y: auto;
+  background: #f4f4f4;
+  margin: 0;
+}
+
+form {
+  -webkit-box-flex: 0;
+  -webkit-flex: none;
+      -ms-flex: none;
+          flex: none;
+  display: -webkit-box;
+  display: -webkit-flex;
+  display: -ms-flexbox;
+  display: flex;
+}
+
+input {
+  -webkit-box-flex: 1;
+  -webkit-flex: auto;
+      -ms-flex: auto;
+          flex: auto;
+  padding: 10px 20px;
+}
+
+button {
+  background: #79daff;
+  padding: 10px 40px;
+  cursor: pointer;
+}
