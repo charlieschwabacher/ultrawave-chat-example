@@ -1,5 +1,5 @@
-Ultrawave = require('ultrawave')
-React = require('react')
+const Ultrawave = require('ultrawave')
+const React = require('react')
 
 
 // create a react component to render the ui
@@ -44,15 +44,15 @@ class App extends React.Component {
 }
 
 
-// connect to our peering server on port 8081
+// connect to our peering server on openshift
 
-const ultrawave = new Ultrawave(`ws://${location.hostname}:8081`)
+const ultrawave = new Ultrawave(`ws://localhost:8081`)
 
 
-// create a group named "chat" w/ an empty array as initial data, and re-render
-// our react component when data changes
+// create a group w/ a name based on the query string, and w/ an empty array as
+// initial data.  We will re-render our react component when data changes
 
-ultrawave.joinOrCreate('chat', [], (data) => {
+ultrawave.joinOrCreate(`chat:${location.search}`, [], (data) => {
   React.render(<App data={data} id={ultrawave.id}/>, document.body)
 })
 
