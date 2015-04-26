@@ -7,4 +7,4 @@ You can find the javascript code in [src/index.js](src/index.js), and [**try a l
 
 To run locally, `npm install` and `npm start`, then visit [localhost:8080](http://localhost:8080/) in a few tabs and try messaging back and forth.
 
-The source is es6 and css4 - after editing, `npm run build` to compile w/ babel and cssnext.
+After editing the source, run `npm run build` to compile w/ babel and cssnext.
