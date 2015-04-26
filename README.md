@@ -1,5 +1,7 @@
 # Ultrawave Chat Example
 
+[**Try it here**](//charlieschwabacher.github.io/ultrawave-chat-example)
+
 This is a simple peer to peer chat app using [ultrawave](//github.com/charlieschwabcher/ultrawave)
 and [react](//github.com/facebook/react).
 
