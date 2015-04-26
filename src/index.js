@@ -44,9 +44,14 @@ class App extends React.Component {
 }
 
 
-// connect to our peering server on openshift
+// connect to our local peering server (or, if this is running on github pages,
+// connect to the example server on openshift)
 
-const ultrawave = new Ultrawave(`ws://examples-ultrawave.rhcloud.com:8000`)
+const ultrawave = new Ultrawave(
+  location.hostname === 'localhost'
+  ? 'ws://locahost:8000'
+  : 'ws://examples-ultrawave.rhcloud.com'
+)
 
 
 // create a group w/ a name based on the query string, and w/ an empty array as
