@@ -1,9 +1,7 @@
 const Ultrawave = require('ultrawave')
 const React = require('react')
 
-
 // create a react component to render the ui
-
 class App extends React.Component {
 
   onSubmit = (e) => {
@@ -60,4 +58,3 @@ const ultrawave = new Ultrawave(
 ultrawave.joinOrCreate(`chat:${location.search}`, [], (data) => {
   React.render(<App data={data} id={ultrawave.id}/>, document.body)
 })
-
