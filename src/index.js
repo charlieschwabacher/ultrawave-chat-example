@@ -46,7 +46,7 @@ class App extends React.Component {
 
 // connect to our peering server on openshift
 
-const ultrawave = new Ultrawave(`ws://localhost:8081`)
+const ultrawave = new Ultrawave(`ws://examples-ultrawave.rhcloud.com:8000`)
 
 
 // create a group w/ a name based on the query string, and w/ an empty array as
