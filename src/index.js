@@ -50,7 +50,7 @@ class App extends React.Component {
 const ultrawave = new Ultrawave(
   location.hostname === 'localhost'
   ? 'ws://locahost:8000'
-  : 'ws://examples-ultrawave.rhcloud.com'
+  : 'ws://examples-ultrawave.rhcloud.com:8000'
 )
 
 
