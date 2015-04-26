@@ -22070,9 +22070,10 @@ var App = (function (_React$Component) {
   return App;
 })(React.Component);
 
-// connect to our peering server on openshift
+// connect to our local peering server (or, if this is running on github pages,
+// connect to the example server on openshift)
 
-var ultrawave = new Ultrawave('ws://examples-ultrawave.rhcloud.com:8000');
+var ultrawave = new Ultrawave(location.hostname === 'localhost' ? 'ws://locahost:8000' : 'ws://examples-ultrawave.rhcloud.com');
 
 // create a group w/ a name based on the query string, and w/ an empty array as
 // initial data.  We will re-render our react component when data changes
